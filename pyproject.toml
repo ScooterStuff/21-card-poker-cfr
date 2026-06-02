@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cardpoker-cfr"
+version = "0.1.0"
+description = "CFR-based AI for 21 Card Poker"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "ScooterStuff" }]
+
+[tool.setuptools.packages.find]
+include = ["cardpoker_cfr*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
