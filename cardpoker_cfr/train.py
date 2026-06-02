@@ -2,6 +2,10 @@
 CLI: train a CFR strategy and save it as JSON.
 
     python -m cardpoker_cfr.train --iters 200000 --out strategies/baseline.json
+
+By default writes both the full per-history strategy and a `*.compact.json`
+companion suitable for game clients (web/desktop). Use `--no-full` to skip the
+larger file.
 """
 
 from __future__ import annotations
@@ -11,7 +15,7 @@ from pathlib import Path
 
 from .cfr import CFRTrainer
 from .game import GameConfig
-from .strategy import save
+from .strategy import save, save_compact
 
 
 def main() -> None:
@@ -30,7 +34,12 @@ def main() -> None:
         "--out",
         type=str,
         default="strategies/baseline.json",
-        help="Output strategy file",
+        help="Output strategy file (full per-history)",
+    )
+    p.add_argument(
+        "--no-full",
+        action="store_true",
+        help="Skip writing the full per-history strategy; only emit the compact file",
     )
     args = p.parse_args()
 
@@ -45,8 +54,13 @@ def main() -> None:
     print(f"Done in {elapsed:.1f}s. Discovered {len(trainer.nodes):,} infosets.")
 
     out = Path(args.out)
-    save(trainer, out)
-    print(f"Saved → {out}")
+    if not args.no_full:
+        save(trainer, out)
+        print(f"Saved full   → {out}  ({out.stat().st_size/1024:.1f} KB)")
+
+    compact = out.with_suffix(".compact.json")
+    n = save_compact(trainer, compact)
+    print(f"Saved compact → {compact}  ({compact.stat().st_size/1024:.1f} KB, {n:,} classes)")
 
 
 if __name__ == "__main__":
